@@ -1,0 +1,6 @@
+*.log
+*.disabled-*
+*.mumu-clean-backup
+test-work/
+MuMuPlayer/
+vms/
