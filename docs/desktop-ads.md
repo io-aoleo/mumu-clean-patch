@@ -1,18 +1,20 @@
-# 保留下载功能并去掉桌面推广
+# 桌面方案回退说明
 
-在 MuMu 6.8.8.0 / 安卓 15 的本机排查中，名为 `app.lawnchair` 的预装桌面包含 MuMu 定制的 `searchAdListView` 推广栏，并绑定应用中心提供的“广告轮播”和“每日发现”小组件。
+当前 v1.0.2 恢复第一版取舍：**保留原 MuMu 桌面，停用应用中心，下载改用浏览器或自行导入。**
 
-因此不能仅凭 Lawnchair 的包名就认为预装桌面没有广告。停用整个 `com.mumu.store` 虽会让这些广告消失，也会影响商店下载；补丁 v1.0.1 已取消这种做法，并恢复该应用的默认启用状态。
+MuMu 6.8.8.0 中预装的 app.lawnchair 是 MuMu 定制桌面，包含游戏推广栏，并使用应用中心提供的推广小组件。停用应用中心可以阻断相关推广来源，但也会影响商店下载及部分导入联动。
 
-需要保留下载又避免桌面推广时，可使用与 MuMu 定制桌面独立的启动器。本机采用 [Fossify Launcher 官方版](https://github.com/FossifyOrg/Launcher/releases/tag/1.10.0)：
+曾尝试的“保留应用中心 + Fossify Launcher 1.10.0”方案不再作为当前推荐。Fossify 该版本主屏幕固定竖屏，在本机 MuMu 中出现变窄、布局不符合使用需求的问题；强制横屏也未达到用户预期。
 
-- 版本：1.10.0，包名 `org.fossify.home`。
-- 官方文件：`launcher-16-foss-release.apk`。
-- 官方发布页 SHA256：`a603d3d510482feafd73d52a93a1ea9baefd2ca0aae329a14cbf0e21f43638e3`。
-- 从官方发布页下载并导入 MuMu，安装后在安卓默认应用中选择 Fossify 为主屏幕。
-- 原 MuMu 桌面及布局保留；可在默认应用设置中切回。
-- 新桌面向上滑动可打开应用列表，原有应用和数据保留。
+本机现已切回 app.lawnchair/.LawnchairLauncher，撤销后来添加的方向强制设置，并停用应用中心。原应用和布局保留，Fossify 没有被卸载。
 
-这会改变桌面布局。进入 MuMu 应用中心后，它自身的推荐页面仍可能显示推广；更换桌面不等于修改应用中心内容。
+若你也手动应用过旧说明中的桌面更换及强制横屏，可按自己实际的备份恢复。以下命令仅适用于默认桌面原本为上述 MuMu 定制桌面、方向原值为 false / free 的实例：
 
-`Apply.cmd` 不会自动下载或更换启动器。独立桌面的安装与切换是可选的额外步骤。未在其他电脑上完成验证。
+```powershell
+& 'E:\MuMuPlayer\nx_main\adb.exe' -s 127.0.0.1:16384 shell cmd package set-home-activity --user 0 app.lawnchair/.LawnchairLauncher
+& 'E:\MuMuPlayer\nx_main\adb.exe' -s 127.0.0.1:16384 shell wm set-ignore-orientation-request false
+& 'E:\MuMuPlayer\nx_main\adb.exe' -s 127.0.0.1:16384 shell wm user-rotation free
+& 'E:\MuMuPlayer\nx_main\adb.exe' -s 127.0.0.1:16384 shell input keyevent 3
+```
+
+安装目录、实例端口及原始设置必须以自己机器为准。Apply.cmd 只应用当前补丁，不会自动切换桌面或调整方向。
