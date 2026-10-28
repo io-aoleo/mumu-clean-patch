@@ -1,8 +1,10 @@
 # MuMu Clean Patch
 
-MuMu 模拟器去广告、禁更新补丁。**补丁版本 1.0.0，适配 Windows MuMu 6.8.8.0（安卓 15）。**
+MuMu 模拟器去广告、禁更新补丁。**补丁版本 1.0.1，适配 Windows MuMu 6.8.8.0（安卓 15）。**
 
-下载：[补丁包 v1.0.0](https://github.com/io-aoleo/mumu-clean-patch/raw/refs/heads/main/downloads/mumu-clean-patch-v1.0.0-MuMu-6.8.8.0.zip) · [SHA256 校验](downloads/mumu-clean-patch-v1.0.0-MuMu-6.8.8.0.zip.sha256)
+下载：[补丁包 v1.0.1](https://github.com/io-aoleo/mumu-clean-patch/raw/refs/heads/main/downloads/mumu-clean-patch-v1.0.1-MuMu-6.8.8.0.zip) · [SHA256 校验](downloads/mumu-clean-patch-v1.0.1-MuMu-6.8.8.0.zip.sha256)
+
+**1.0.1 修复下载问题：保留并恢复 MuMu 应用中心。旧版 1.0.0 停用应用中心会影响商店下载，请勿继续使用旧版；启动安卓实例后运行新版 `Apply.cmd` 即可恢复下载入口，同时保留电脑端广告缓存屏蔽和禁更新。商店内的推荐内容可能重新出现。**
 
 这是可检查源码、可恢复的独立脚本补丁，不是反编译或重新分发的 MuMu 安装器，不包含 MuMu 二进制、安卓镜像、用户数据或账号信息。
 
@@ -27,11 +29,11 @@ MuMu 模拟器去广告、禁更新补丁。**补丁版本 1.0.0，适配 Window
 | 开屏广告 | 备份 `startupImage`，用只读空文件占住原路径 | 阻止该缓存目录重建 |
 | 电脑端推广缓存 | 同样处理 `ProgramAds` | 阻止该缓存目录重建 |
 | 更新程序 | 备份 `nx_main/MuMuNxUpdater.exe`，在原路径放只读空文件 | 阻止此更新程序执行，自动和手动更新均受影响 |
-| 安卓应用中心 | 已运行实例具有其他默认桌面时，停用 `com.mumu.store` | MuMu 商店下载入口停用，安装应用和数据保留 |
+| 安卓应用中心 | 保留 `com.mumu.store`，恢复旧版补丁停用的组件 | 保留商店下载和安装入口，应用数据不变 |
 
-Android 步骤通过 MuMu 自带的 CLI / ADB 完成，不自动安装桌面、不启用 root、不擦除应用数据。若仍使用原 MuMu 桌面，会跳过应用中心停用，避免失去桌面；可先自行安装并选择 Lawnchair 等桌面，再运行补丁。未运行的实例需要启动后再运行补丁。
+Android 步骤通过 MuMu 自带的 CLI / ADB 完成，不自动安装桌面、不启用 root、不擦除应用数据，不修改现有默认桌面。未运行的实例需要启动后再运行补丁，才能恢复此前停用的下载组件。
 
-电脑端 `blocked=True` 表示目标已被阻断；Android 输出 `disabled-user` 或 `package:com.mumu.store` 表示已停用。跳过或失败的 Android 步骤会给出警告，不代表安卓广告已处理。
+电脑端 `blocked=True` 表示目标已被阻断；Android 输出 `new state: default` 并在启用列表显示 `package:com.mumu.store` 表示应用中心已恢复。跳过或失败的 Android 步骤会给出警告。启用状态核验不等于已经完成实际文件下载测试。
 
 ## 恢复
 

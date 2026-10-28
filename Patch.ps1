@@ -27,7 +27,7 @@ foreach ($root in @($InstallPath, $DataPath)) {
 }
 $configPath = Join-Path $InstallPath 'configs\main\install_config.json'
 $version = (Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json).product.version
-Write-Host "MuMu version: $version / Patch version: 1.0.0 / Mode: $Mode"
+Write-Host "MuMu version: $version / Patch version: 1.0.1 / Mode: $Mode"
 if ($Mode -eq 'Apply' -and $version -ne $ExpectedVersion) {
     throw "Unsupported version. This patch supports $ExpectedVersion only."
 }
@@ -111,7 +111,7 @@ foreach ($target in $targets) {
     Write-Host "$(Split-Path -Leaf $path): blocked=$([bool]$blocked); backup=$(Test-Path -LiteralPath $backup)"
     if ($Mode -eq 'Apply' -and -not $blocked) { throw "Verification failed: $path" }
 }
-# No Android data is removed. Do not disable the store unless another HOME app exists.
+# Keep the application center enabled: its download/install functions are shared.
 $adb = Join-Path $InstallPath 'nx_main\adb.exe'
 $cli = Join-Path $InstallPath 'nx_main\mumu-cli.exe'
 if (-not $SkipAndroid -and (Test-Path -LiteralPath $adb) -and (Test-Path -LiteralPath $cli)) {
@@ -122,24 +122,19 @@ if (-not $SkipAndroid -and (Test-Path -LiteralPath $adb) -and (Test-Path -Litera
             $devices = @($devices[0].PSObject.Properties | ForEach-Object { $_.Value })
         }
         $running = @($devices | Where-Object { $_.is_android_started -and $_.adb_port })
-        if (-not $running.Count) { Write-Warning 'Start Android, then run Apply again to disable its store.' }
+        if (-not $running.Count) { Write-Warning 'Start Android, then run Apply again to restore its download center.' }
         foreach ($device in $running) {
             $serial = '127.0.0.1:' + [int]$device.adb_port
             & $adb connect $serial | Out-Null
             if ($LASTEXITCODE -ne 0) { throw "ADB connection failed: $serial" }
             $androidHome = (& $adb -s $serial shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME | Out-String).Trim()
-            if ($Mode -eq 'Apply') {
-                if ($androidHome -notmatch '(?m)^([\w.]+)/[\w.$]+\s*$' -or $Matches[1] -match '^(com\.mumu\.store|android)$') {
-                    Write-Warning "Store left enabled on ${serial}: install and select an alternative launcher first."
-                    continue
-                }
-                & $adb -s $serial shell pm disable-user --user 0 com.mumu.store
-            } elseif ($Mode -eq 'Restore') {
+            if ($Mode -in @('Apply','Restore')) {
                 & $adb -s $serial shell pm default-state --user 0 com.mumu.store
             }
             if ($LASTEXITCODE -ne 0) { throw "Android operation failed: $serial" }
             Write-Host "Android $serial default HOME: $androidHome"
-            & $adb -s $serial shell pm list packages -d com.mumu.store
+            Write-Host 'Enabled application center (required for downloads):'
+            & $adb -s $serial shell pm list packages -e com.mumu.store
         }
     } catch {
         Write-Warning "PC patch completed; Android step needs attention: $_"
